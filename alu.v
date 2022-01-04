@@ -76,7 +76,7 @@ module alu(
 
 	always @(*) begin
 		case (alucontrol)
-			// 8条逻辑运算指令
+			// ①8条逻辑运算指令
 			`EXE_AND_OP:  y <= a & b; // and  - 与
 			`EXE_ANDI_OP: y <= a & b; // andi - 与
 			`EXE_OR_OP:   y <= a | b; // or  - 或
@@ -86,7 +86,7 @@ module alu(
 			`EXE_NOR_OP:  y <= ~(a | b); // nor - 或非
 			`EXE_LUI_OP:  y <= {b[15:0], 16'b0}; // lui
 			
-			// 6条移位运算指令
+			// ②6条移位运算指令
 			`EXE_SLL_OP:   y <= b << sa;     // sll  - 逻辑左移
 			`EXE_SLLV_OP:  y <= b << a[4:0]; // sllv - 逻辑左移
 			`EXE_SRL_OP:   y <= b >> sa;	 // srl  - 逻辑右移，最高位用0补
@@ -94,7 +94,7 @@ module alu(
 			`EXE_SRA_OP:   y <= $signed(b) >>> sa; 	   // sra  - 算术右移，最高位用b的符号位补
 			`EXE_SRAV_OP:  y <= $signed(b) >>> a[4:0]; // srav - 算术右移，最高位用b的符号位补
 			
-			// 4条数据移动指令
+			// ③4条数据移动指令
 			// TODO 可优化hilo，将其拆开
 			// `EXE_MFHI_OP:  y <= hilo_in[63:32];
 			// `EXE_MTHI_OP:  hilo_out <= {a, hilo_in[31:0]};
@@ -106,7 +106,7 @@ module alu(
 			`EXE_MFLO_OP:  y <= lo_in;
 			`EXE_MTLO_OP:  lo_out <= a;
 			
-			// 14条算术运算指令
+			// ④14条算术运算指令
 			// R-型
 			// # 加法组
 			`EXE_ADD_OP:   y <= a + b;
@@ -134,10 +134,15 @@ module alu(
 			`EXE_SLTI_OP:  y <= ($signed(a) < $signed(b));
 			`EXE_SLTIU_OP: y <= (a < b);
 
-			// 12条转移指令
-
-			// 8条访存指令
-
+			// ⑥8条访存指令
+			`EXE_LW_OP:    y <= a + b;
+			`EXE_LB_OP:    y <= a + b;
+			`EXE_LBU_OP:   y <= a + b;
+			`EXE_LH_OP:    y <= a + b;
+			`EXE_LHU_OP:   y <= a + b;
+			`EXE_SB_OP:    y <= a + b;
+			`EXE_SH_OP:    y <= a + b;
+			`EXE_SW_OP:    y <= a + b;
 			default: begin
 				y <= 32'b0;
 				// hi_out <= 32'b0;

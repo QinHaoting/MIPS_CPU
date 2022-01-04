@@ -26,7 +26,11 @@ module mips(
 	input wire[31:0] instrF,
 	output wire memwriteM,
 	output wire[31:0] aluoutM,writedataM,
-	input wire[31:0] readdataM 
+
+
+	input wire[31:0] readdataM,
+	output wire [3:0] selM,
+	output wire [1:0] sizeM
     );
 	
 
@@ -44,6 +48,30 @@ module mips(
 			regwriteE,regwriteM,regwriteW;
 	wire [7:0] alucontrolE;
 	wire flushE,equalD;
+
+	// IF
+
+	// ID
+
+	// EX
+
+	// MEM
+	wire [7:0] alucontrolM;
+	
+	
+	// wire [3:0] rselM;
+
+	// WB
+
+	// 访存
+	// assign data_sram_en = memenM & ~flush_except;
+	// assign data_sram_write = memwriteM;
+	// assign data_sram_wen = selM;
+	// assign data_sram_size = sizeM;
+	// assign data_sram_addr_temp = aluoutM;
+	// assign data_sram_addr = data_sram_addr_temp;
+	// assign data_sram_wdata = writedata2M;
+	// assign readdataM = data_sram_rdata;
 
 	controller c(
 		.clk(clk),
@@ -81,6 +109,7 @@ module mips(
 		.memtoregM(memtoregM),
 		.memwriteM(memwriteM),
 		.regwriteM(regwriteM),
+		.alucontrolM(alucontrolM),
 		
 		// WB stage
 		.memtoregW(memtoregW),
@@ -127,8 +156,12 @@ module mips(
 		.memtoregM(memtoregM),
 		.regwriteM(regwriteM),
 		.aluoutM(aluoutM),
-		.writedataM(writedataM),
+		// .writedataM(writedataM),
+		.writedata2M(writedataM), // TODO 
 		.readdataM(readdataM),
+		.alucontrolM(alucontrolM),
+		.selM(selM),
+		.sizeM(sizeM),
 
 		// WB stage
 		.memtoregW(memtoregW),

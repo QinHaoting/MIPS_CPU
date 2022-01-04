@@ -49,8 +49,14 @@ module datapath(
 	// MEM stage
 	input wire memtoregM,
 	input wire regwriteM,
-	output wire[31:0] aluoutM,writedataM,
+	output wire[31:0] aluoutM, 
+	output wire[31:0] writedata2M,
 	input wire[31:0] readdataM,
+	// 访存
+	input wire[7:0] alucontrolM,
+	output wire[3:0] selM,
+	output wire [1:0] sizeM,
+	// output wire[3:0] rselM,
 
 	// output wire flush_except,
 	
@@ -112,6 +118,8 @@ module datapath(
 
 	// MEM stage
 	wire [4:0] writeregM;
+	wire [31:0] writedataM;
+	wire [31:0] readdata2M;
 
 	wire is_in_delayslotM;
 	
@@ -268,9 +276,17 @@ module datapath(
 	flopenr #(32) rHIM(.clk(clk), .rst(rst), .en((hi_weE&(~flushE))), .d(hi_outE), .q(hi_inE)); // 在MEM阶段写回HI寄存器，结果为hi_inE
 	flopenr #(32) rLOM(.clk(clk), .rst(rst), .en((lo_weE&(~flushE))), .d(lo_outE), .q(lo_inE)); // 在MEM阶段写回LO寄存器，结果为lo_inE
 
+	data_mem_sel data_mem_sel(.op(alucontrolM), .addr(aluoutM[1:0]), 
+							  .writedata(writedataM), .readdata(readdataM),
+							  .sel(selM),
+							//   .rsel(rselM),
+							  .writedata2(writedata2M), .readdata2(readdata2M),
+							//   .adel(adelM), .ades(adesM),
+							  .size(sizeM));
+
 	// WB stage
 	flopr #(32) r1W(clk,rst,aluoutM,aluoutW);
-	flopr #(32) r2W(clk,rst,readdataM,readdataW);
+	flopr #(32) r2W(clk,rst,readdata2M,readdataW);
 	flopr #(5) r3W(clk,rst,writeregM,writeregW);
 
 	// flopenr #(32) r5W(clk,rst,~stallW,pcM,pcW);

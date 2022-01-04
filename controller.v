@@ -48,6 +48,8 @@ module controller(
 	// MEM stage
 	output wire memtoregM,memwriteM,
 				regwriteM,
+	output wire [7:0]alucontrolM,
+	output wire memenM,
 	// WB stage
 	output wire memtoregW,regwriteW
 
@@ -60,16 +62,19 @@ module controller(
 	wire[7:0] alucontrolD;
 	wire hi_weD; // HI寄存器 - 写使能信号
 	wire lo_weD; // LO寄存器 - 写使能信号
+
+	wire memenD;
 	
 	// EX stage
 	wire memwriteE;
+	wire memenE;
 
 
 	maindec md(.instr(instrD),
 			   .stallD(stallD),
 			   .memtoreg(memtoregD),
 			   .memwrite(memwriteD),
-			//    .memen(memenD),
+			   .memen(memenD),
 			   
 			   .alusrc(alusrcD),
 			   .regdst(regdstD),
@@ -97,7 +102,7 @@ module controller(
 	assign pcsrcD = branchD & equalD;
 
 	//pipeline registers
-	flopenrc #(20) regE(
+	flopenrc #(21) regE(
 		.clk(clk),
 		.rst(rst),
 		.en(~stallE),
@@ -105,12 +110,14 @@ module controller(
 		.d({memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD, 
 			hi_weD, lo_weD,
 			div_validD,signed_divD,
-			jalD, jrD, balD
+			jalD, jrD, balD,
+			memenD
 			}),
 		.q({memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE, 
 			hi_weE, lo_weE,
 			div_validE, signed_divE,
-			jalE, jrE, balE
+			jalE, jrE, balE,
+			memenE
 			})
 	    // .d({memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD}),
 		// .q({memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE})
@@ -124,10 +131,14 @@ module controller(
 	// 	{memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE}
 	// 	);
 
-	flopr #(8) regM(
+	flopr #(15) regM(
 		clk,rst,
-		{memtoregE,memwriteE,regwriteE},
-		{memtoregM,memwriteM,regwriteM}
+		{memtoregE,memwriteE,regwriteE,
+		 alucontrolE,
+		 memenE},
+		{memtoregM,memwriteM,regwriteM,
+		 alucontrolM,
+		 memenM}
 		);
 
 	flopr #(8) regW(
