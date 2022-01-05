@@ -43,10 +43,12 @@ module datapath(
 	input wire[7:0] alucontrolE,
 	input wire hi_weE, lo_weE, 			// HI、LO寄存器 - 写使能信号
 	input wire div_validE, signed_divE, // 除法 - 使能、有无符号
+	input wire jalE,jrE,balE,
 	output wire stallE,
 	output wire flushE,
 	
 	// MEM stage
+	input wire memenM,
 	input wire memtoregM,
 	input wire regwriteM,
 	output wire[31:0] aluoutM, 
@@ -62,10 +64,16 @@ module datapath(
 	
 	// WB stage
 	input wire memtoregW,
-	input wire regwriteW
+	input wire regwriteW,
+
+
+	output wire[31:0] pcW,		  // PC
+	output wire[3 :0] rf_wen,	  // 
+	output wire[4 :0] writeregW,  // 写入寄存器
+	output wire[31:0] resultW	  // 写入数据
     );
 
-	wire [31:0] newpcM;
+	
 	
 	// IF stage
 	wire stallF;
@@ -78,11 +86,12 @@ module datapath(
 	wire is_in_delayslotF;
 	
 	// ID stage
+	wire [31:0] pcD;
 	wire [31:0] pcplus4D;
 	wire [1:0] jumpjrjalD;
 	wire forwardaD,forwardbD;
 	wire [4:0] rsD,rtD,rdD, saD;
-	wire flushD; 
+	// wire flushD; 
 	wire [31:0] signimmD,signimmshD;
 	wire [31:0] srcaD,srca2D,srcbD,srcb2D;
 
@@ -109,7 +118,8 @@ module datapath(
 
 
 	// 分支跳转
-	wire branchE, jumpE, jalE, jrE, balE;
+	wire [31:0] pcE;
+	// wire branchE, jumpE, jalE, jrE, balE;
 	wire [4:0] writereg2E;
 	wire [31:0] aluout2E;
 	wire [31:0] pcplus8F, pcplus8D, pcplus8E;
@@ -117,18 +127,23 @@ module datapath(
 	wire is_in_delayslotE;
 
 	// MEM stage
+	wire [31:0] pcM;
 	wire [4:0] writeregM;
 	wire [31:0] writedataM;
 	wire [31:0] readdata2M;
-
-	wire is_in_delayslotM;
+	// wire [31:0] newpcM;
+	// wire is_in_delayslotM;
 	
 
 
 	// WB stage
-	wire [4:0] writeregW;
-	wire [31:0] aluoutW,readdataW,resultW;
+	// wire [4:0] writeregW;
+	wire [31:0] aluoutW;
+	wire [31:0] readdataW;
+	// wire [31:0] resultW;
 	
+	assign rf_wen = {4{regwriteW}};
+
 	// hazard detection
 	hazard h(
 		// IF stage
@@ -146,7 +161,7 @@ module datapath(
 		.forwardaD(forwardaD),
 		.forwardbD(forwardbD),
 		.stallD(stallD),
-		.flushD(flushD),
+		// .flushD(flushD),
 
 		// EX stage
 		.rsE(rsE),
@@ -192,7 +207,6 @@ module datapath(
 	regfile rf(clk,regwriteW,rsD,rtD,writeregW,resultW,srcaD,srcbD);
 
 	//fetch stage logic
-	// pc #(32) pcreg(clk,rst,~stallF,pcnextFD,pcF);
 	pc #(32) pcreg(.clk(clk), .rst(rst),
 				   .en(~stallF),
 				   .d(pcnextFD), .q(pcF));
@@ -207,11 +221,11 @@ module datapath(
 	// exception exp(rst,exceptM,tlb_except2M,adelM,adesM,status_o,cause_o,excepttypeM);
 
 	// ID stage
-	flopenr #(32) r1D(clk,rst,~stallD,pcplus4F,pcplus4D);
+	flopenrc #(32) r1D(.clk(clk), .rst(rst), .en(~stallD), .d(pcplus4F),.q(pcplus4D));
 	// TODO flushD没有值
-	flopenrc #(32) r2D(clk,rst,~stallD,flushD,instrF,instrD);
-	flopenrc #(32) r3D(clk,rst,~stallD,flushD,pcplus8F,pcplus8D);
-	// flopenrc #(32) r4D(clk,rst,~stallD,flushD,pcF,pcD);
+	flopenrc #(32) r2D(.clk(clk), .rst(rst), .en(~stallD), .d(instrF),  .q(instrD));
+	flopenrc #(32) r3D(.clk(clk), .rst(rst), .en(~stallD), .d(pcplus8F),.q(pcplus8D));
+	flopenrc #(32) r4D(.clk(clk), .rst(rst), .en(~stallD), .d(pcF),     .q(pcD));
 
 	// flopenrc #(1) r6D(clk,rst,~stallD,flushD,is_in_delayslotF,is_in_delayslotD);
 	
@@ -232,16 +246,17 @@ module datapath(
 	assign functD = instrD[5:0];
 
 	// EX stage
-	floprc #(32) r1E(clk,rst,flushE,srcaD,srcaE);
-	floprc #(32) r2E(clk,rst,flushE,srcbD,srcbE);
-	floprc #(32) r3E(clk,rst,flushE,signimmD,signimmE);
-	floprc #(5) r4E(clk,rst,flushE,rsD,rsE);
-	floprc #(5) r5E(clk,rst,flushE,rtD,rtE);
-	floprc #(5) r6E(clk,rst,flushE,rdD,rdE);
+	flopenrc #(32) r1E(clk,rst,~stallE,flushE,srcaD,srcaE);
+	flopenrc #(32) r2E(clk,rst,~stallE,flushE,srcbD,srcbE);
+	flopenrc #(32) r3E(clk,rst,~stallE,flushE,signimmD,signimmE);
+
+	flopenrc #(5)  r4E(clk,rst,~stallE,flushE,rsD,rsE);
+	flopenrc #(5)  r5E(clk,rst,~stallE,flushE,rtD,rtE);
+	flopenrc #(5)  r6E(clk,rst,~stallE,flushE,rdD,rdE);
 	flopenrc #(5)  r7E(.clk(clk), .rst(rst), .en(~stallE), .clear(flushE), .d(saD), .q(saE));
-	flopenrc #(5)  r9E(clk,rst,~stallE,flushE,{branchD, jumpD, jalD, jrD, balD},{branchE, jumpE, jalE, jrE, balE});
 	flopenrc #(32) r8E(clk,rst,~stallE,flushE,pcplus8D,pcplus8E);
-	// flopenrc #(32) r9E(clk,rst,~stallE,flushE,pcD,pcE);
+	// flopenrc #(5)  r9E(clk,rst,~stallE,flushE,{branchD, jumpD, jalD, jrD, balD},{branchE, jumpE, jalE, jrE, balE});
+	flopenrc #(32) r10E(clk,rst,~stallE,flushE,pcD,pcE);
 	// flopenrc #(1) r11E(clk,rst,~stallE,flushE,is_in_delayslotD,is_in_delayslotE);
 	
 	mux3 #(32) forwardaemux(srcaE,resultW,aluoutM,forwardaE,srca2E);
@@ -270,10 +285,12 @@ module datapath(
 	flopr #(32) r2M(clk,rst,aluout2E,aluoutM); // TODO PC
 	// flopenrc #(32) r2M(.clk(clk), .rst(rst), .en(~stallM), .clear(flushM), .d(aluout2E), .q(aluoutM));
 	flopr #(5) r3M(clk,rst,writereg2E,writeregM);
-	// flopenrc #(32) r5M(clk,rst,~stallM,flushM,pcE,pcM);
+	flopr #(32) r5M(clk,rst,pcE,pcM); // TODO flushM
 	// flopenrc #(1) r7M(clk,rst,~stallM,flushM,is_in_delayslotE,is_in_delayslotM);
 	
+	// HI寄存器 - MEM阶段写回
 	flopenr #(32) rHIM(.clk(clk), .rst(rst), .en((hi_weE&(~flushE))), .d(hi_outE), .q(hi_inE)); // 在MEM阶段写回HI寄存器，结果为hi_inE
+	// LO寄存器 - MEM阶段写回
 	flopenr #(32) rLOM(.clk(clk), .rst(rst), .en((lo_weE&(~flushE))), .d(lo_outE), .q(lo_inE)); // 在MEM阶段写回LO寄存器，结果为lo_inE
 
 	data_mem_sel data_mem_sel(.op(alucontrolM), .addr(aluoutM[1:0]), 
@@ -284,12 +301,38 @@ module datapath(
 							//   .adel(adelM), .ades(adesM),
 							  .size(sizeM));
 
+
 	// WB stage
 	flopr #(32) r1W(clk,rst,aluoutM,aluoutW);
 	flopr #(32) r2W(clk,rst,readdata2M,readdataW);
 	flopr #(5) r3W(clk,rst,writeregM,writeregW);
+	flopr #(32) r5W(clk,rst,pcM,pcW);
 
-	// flopenr #(32) r5W(clk,rst,~stallW,pcM,pcW);
+	//W阶段处理MTC0，M阶段处理异常
+	// cp0 CP0(// ---input---
+	// 		.clk(clk), .rst(rst),
+	// 		.we_i(cp0weW), 
+	// 		.waddr_i(rdW), 
+	// 		.raddr_i(rdE),
+	// 		.data_i(aluoutW), 
+	// 		.int_i(6'b000000), 
+	// 		.excepttype_i(excepttypeM),
+	// 		.current_inst_addr_i(pcM), 
+	// 		.is_in_delayslot_i(is_in_delayslotM),
+	// 		.bad_addr_i(bad_addrM), 
+	// 		// ---output---
+	// 		.data_o(cp0dataE), 
+	// 		.count_o(count_oW),		// Count
+	// 		.compare_o(compare_oW), 
+	// 		.status_o(status_oW),   // Status
+	// 		.cause_o(cause_oW),		// Cause
+	// 		.epc_o(epc_oW),			// EPC
+	// 		.config_o(config_oW),
+	// 		.prid_o(prid_oW),
+	// 		.badvaddr(badvaddrM));
+
+
+	
 	mux2 #(32) resmux(aluoutW,readdataW,memtoregW,resultW);
 
 

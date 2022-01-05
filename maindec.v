@@ -21,13 +21,6 @@
 
 `include "defines.vh"
 module maindec(
-	// input wire[5:0] op,
-	// output wire memtoreg,memwrite,
-	// output wire branch,alusrc,
-	// output wire regdst,regwrite,
-	// output wire jump,
-	// output wire[1:0] aluop
-
 
 	input wire stallD,
 	input wire[31:0] instr,
@@ -52,85 +45,6 @@ module maindec(
 	assign rt = instr[20:16];
 	assign func = instr[5:0];
 
-	// reg[13:0] controls;
-	// assign {regwrite,regdst,alusrc,branch,memwrite,memtoreg,jump, jal, jr, bal, jalr, hi_we, lo_we, memen} = controls;
-	// always @(*) begin
-	// 	if (stallD) begin
-	// 		controls <= 14'b0000000_0000_00_0;
-	// 	end
-	// 	else begin
-	// 		controls <= 14'b0000000_0000_00_0;
-	// 		case (op)
-	// 			// R-型
-	// 			`EXE_SPECIAL_INST: begin
-	// 				// TODO 可删除？？？
-	// 				controls <= 14'b1100000_0000_00_0;
-	// 				case(func)
-	// 					// R-型 - 逻辑
-	// 					`EXE_AND:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_OR:      controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_XOR:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_NOR:     controls <= 14'b1100000_0000_00_0;
-						
-	// 					// R-型 - 移位
-	// 					`EXE_SLL:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SLLV:    controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SRLV:    controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SRL:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SRA:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SRAV:    controls <= 14'b1100000_0000_00_0;					
-
-	// 					// R-型 - 数据移动
-	// 					`EXE_MFHI:    controls <= 14'b1100000_0000_00_0; // HI寄存器 → 通用寄存器
-	// 					`EXE_MFLO:    controls <= 14'b1100000_0000_00_0; // LO寄存器 → 通用寄存器
-	// 					`EXE_MTHI:    controls <= 14'b0000000_0000_10_0; // 通用寄存器 → HI寄存器
-	// 					`EXE_MTLO:    controls <= 14'b0000000_0000_01_0; // 通用寄存器 → LO寄存器	
-						
-	// 					// R-型 - 算术
-	// 					`EXE_ADD:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_ADDU:    controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SUB:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SUBU:    controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SLT:     controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_SLTU:    controls <= 14'b1100000_0000_00_0;
-	// 					`EXE_MULT:    controls <= 13'b0000000_0000_11_0;
-	// 					`EXE_MULTU:   controls <= 13'b0000000_0000_11_0;
-	// 					`EXE_DIV:     controls <= 13'b0000000_0000_11_0;
-	// 					`EXE_DIVU:    controls <= 13'b0000000_0000_11_0;						
-
-	// 					default:  controls <= 14'b0000000_0000_00_0; //illegal op
-	// 					// default:      invalid <= 1; //异常指令controls <= 14'b0000000000000;
-	// 				endcase
-	// 			end
-
-	// 			// I-型
-	// 			// I-型 - 逻辑运算
-	// 			`EXE_ANDI: controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_XORI: controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_LUI:  controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_ORI:  controls <= 14'b1010000_0000_00_0;
-				
-	// 			// I-型 - 算术
-	// 			`EXE_ADDI:  controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_ADDIU: controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_SLTI:  controls <= 14'b1010000_0000_00_0;
-	// 			`EXE_SLTIU: controls <= 14'b1010000_0000_00_0;
-
-	// 			// TODO I-型 - 访存
-	// 			// `EXE_LW:   controls <= 9'b101001000; // lw
-	// 			// `EXE_SW:   controls <= 9'b001010000; // sw
-				
-	// 			// TODO I-型 - 跳转
-	// 			// `EXE_BEQ:  controls <= 9'b000100001; // beq
-			
-	// 			// J-型
-	// 			// `EXE_J: controls <= 9'b000000100; // J
-
-	// 			default:  controls <= 14'b0000000_0000_00_0;//illegal op
-	// 		endcase
-	// 	end
-	// end
-
 	// 写回寄存器 - 写使能信号
 	assign regwrite = (
 					   // ①逻辑
@@ -154,8 +68,8 @@ module maindec(
 					   (op == `EXE_LBU)   ||
 					   (op == `EXE_LH)    ||
 					   (op == `EXE_LHU)   ||
-					   (op == `EXE_LW)    
-                   		// (instr[31:21] == 11'b01000000000 && instr[10:0] == 11'b00000000000)//MFC0
+					   (op == `EXE_LW)    ||
+                   	   (instr[31:21] == 11'b01000000000 && instr[10:0] == 11'b00000000000)//MFC0
                    ) && ~stallD; 
 
 	assign regdst = (// R型

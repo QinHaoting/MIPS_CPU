@@ -34,8 +34,9 @@ module pc #(parameter WIDTH = 8)(
 		end else if(en) begin
 			/* code */
 			q <= d;
-		end else begin // TODO pc
-			q <= q;
-		end
+		end 
+		// else begin // TODO pc
+		// 	q <= q;
+		// end
 	end
 endmodule

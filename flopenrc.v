@@ -33,6 +33,8 @@ module flopenrc #(parameter WIDTH = 8)(
 		end else if(en) begin
 			/* code */
 			q <= d;
+		end  else begin
+        	q <= q;
 		end
 	end
 endmodule

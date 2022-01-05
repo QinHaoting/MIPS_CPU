@@ -95,12 +95,6 @@ module alu(
 			`EXE_SRAV_OP:  y <= $signed(b) >>> a[4:0]; // srav - 算术右移，最高位用b的符号位补
 			
 			// ③4条数据移动指令
-			// TODO 可优化hilo，将其拆开
-			// `EXE_MFHI_OP:  y <= hilo_in[63:32];
-			// `EXE_MTHI_OP:  hilo_out <= {a, hilo_in[31:0]};
-			// `EXE_MFLO_OP:  y <= hilo_in[31:0];
-			// `EXE_MTLO_OP:  hilo_out <= {hilo_in[63:32], a};
-			
 			`EXE_MFHI_OP:  y <= hi_in;
 			`EXE_MTHI_OP:  hi_out <= a;
 			`EXE_MFLO_OP:  y <= lo_in;
