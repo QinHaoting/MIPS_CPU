@@ -56,7 +56,6 @@ module controller(
     );
 	
 	// ID stage
-	// wire[1:0] aluopD;
 	wire memtoregD,memwriteD,alusrcD,
 		regdstD,regwriteD;
 	wire[7:0] alucontrolD;
@@ -94,7 +93,6 @@ module controller(
 			   .signed_div(signed_divD) // 除法 - 有无符号
 			   );
 
-	// aludec ad(functD,aluopD,alucontrolD);
 	aludec ad(.instr(instrD),
 			  .stallD(stallD),
 			  .alucontrol(alucontrolD));
@@ -119,17 +117,8 @@ module controller(
 			jalE, jrE, balE,
 			memenE
 			})
-	    // .d({memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD}),
-		// .q({memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE})
 	);
 
-	// floprc #(8) regE(
-	// 	clk,
-	// 	rst,
-	// 	flushE,
-	// 	{memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD},
-	// 	{memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE}
-	// 	);
 
 	flopr #(15) regM(
 		clk,rst,

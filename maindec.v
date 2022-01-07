@@ -21,7 +21,6 @@
 
 `include "defines.vh"
 module maindec(
-
 	input wire stallD,
 	input wire[31:0] instr,
 	output wire memtoreg,
@@ -34,8 +33,6 @@ module maindec(
 	output wire lo_we, // LO寄存器 - 写使能
 	output wire div_valid, // 除法 - 使能
 	output wire signed_div // 除法 - 有无符号
-	// output reg invalid,
-	// output wire cp0we
     );
 
 	wire [5:0] op;
@@ -68,8 +65,7 @@ module maindec(
 					   (op == `EXE_LBU)   ||
 					   (op == `EXE_LH)    ||
 					   (op == `EXE_LHU)   ||
-					   (op == `EXE_LW)    ||
-                   	   (instr[31:21] == 11'b01000000000 && instr[10:0] == 11'b00000000000)//MFC0
+					   (op == `EXE_LW)
                    ) && ~stallD; 
 
 	assign regdst = (// R型

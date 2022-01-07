@@ -21,10 +21,6 @@
 
 `include "defines.vh"
 module aludec(
-	// input wire[5:0] funct,
-	// input wire[1:0] aluop,
-	// output reg[2:0] alucontrol
-
 	input wire [31:0] instr,
 	input wire stallD,
 	output reg[7:0] alucontrol
@@ -138,19 +134,6 @@ module aludec(
 				`EXE_SB:  alucontrol <= `EXE_SB_OP;
 				`EXE_SH:  alucontrol <= `EXE_SH_OP;
 				`EXE_SW:  alucontrol <= `EXE_SW_OP;
-
-
-				// 2'b00: alucontrol <= 3'b010; //add (for lw/sw/addi)
-				// 2'b01: alucontrol <= 3'b110; //sub (for beq)
-				// default : case (funct)
-					
-				// 	`EXE_ADD:alucontrol <= 3'b010; //add
-				// 	`EXE_SUB:alucontrol <= 3'b110; //sub
-				// 	`EXE_AND:alucontrol <= 3'b000; //and
-				// 	`EXE_OR:alucontrol <= 3'b001; //or
-				// 	`EXE_SLT:alucontrol <= 3'b111; //slt
-				// 	default:  alucontrol <= 3'b000;
-				// endcase
 			endcase
 		end
 	end
