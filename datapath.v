@@ -66,19 +66,17 @@ module datapath(
 
 
 	output wire[31:0] pcW,		  // PC
-	output wire[3 :0] rf_wen,	  // 
+	output wire[3 :0] rf_wen,	  // 写使能
 	output wire[4 :0] writeregW,  // 写入寄存器
 	output wire[31:0] resultW	  // 写入数据
     );
 
 	// IF stage
 	wire stallF;
-	wire flushF;
 	
 	// IF-ID
 	wire [31:0] pcnextFD,pcnextbrFD,pcplus4F,pcbranchD;
 
-	wire is_in_delayslotF;
 	
 	// ID stage
 	wire [31:0] pcD;
@@ -90,8 +88,6 @@ module datapath(
 	wire [31:0] signimmD,signimmshD;
 	wire [31:0] srcaD,srca2D,srcbD,srcb2D;
 
-	wire is_in_delayslotD;
-	
 
 	// EX stage
 	wire [1:0] forwardaE,forwardbE;
@@ -118,7 +114,6 @@ module datapath(
 	wire [31:0] aluout2E;
 	wire [31:0] pcplus8F, pcplus8D, pcplus8E;
 
-	wire is_in_delayslotE;
 
 	// MEM stage
 	wire [31:0] pcM;
@@ -140,7 +135,6 @@ module datapath(
 	hazard h(
 		// IF stage
 		.stallF(stallF),
-		.flushF(flushF),
 
 		// ID stage
 		.rsD(rsD),
@@ -240,6 +234,7 @@ module datapath(
 	mux3 #(32) forwardaemux(srcaE,resultW,aluoutM,forwardaE,srca2E);
 	mux3 #(32) forwardbemux(srcbE,resultW,aluoutM,forwardbE,srcb2E);
 	mux2 #(32) srcbmux(srcb2E,signimmE,alusrcE,srcb3E);
+	
 	// 除法器
 	divider div(.clk(~clk), .rst(rst), 
 				   .a(srca2E), .b(srcb3E), 
@@ -260,7 +255,7 @@ module datapath(
 	// MEM stage
 	flopr #(32) r1M(clk,rst,srcb2E,writedataM);
 	flopr #(32) r2M(clk,rst,aluout2E,aluoutM); // TODO PC
-	flopr #(5) r3M(clk,rst,writereg2E,writeregM);
+	flopr #(5)  r3M(clk,rst,writereg2E,writeregM);
 	flopr #(32) r5M(clk,rst,pcE,pcM); // TODO flushM
 	
 	// HI寄存器 - MEM阶段写回

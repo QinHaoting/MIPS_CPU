@@ -33,7 +33,7 @@ module controller(
 	input wire[5:0] opD,functD,
 	input wire equalD,
 	output wire pcsrcD, 
-	output wire branchD, jumpD, jalD, jrD, balD,
+	output wire branchD, jumpD, jalD, jrD, balD, // 跳转控制
 	
 	// EX stage
 	input wire flushE,

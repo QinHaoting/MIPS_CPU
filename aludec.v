@@ -78,7 +78,7 @@ module aludec(
 						// ⑤转移 - JR & Link组
 						`EXE_JALR: alucontrol <= `EXE_JALR_OP;
 						
-						default: // TODO 默认空指令?
+						default: // TODO 默认空指令？
 							alucontrol <= `EXE_NOP_OP;
 					endcase
 				end
@@ -134,6 +134,9 @@ module aludec(
 				`EXE_SB:  alucontrol <= `EXE_SB_OP;
 				`EXE_SH:  alucontrol <= `EXE_SH_OP;
 				`EXE_SW:  alucontrol <= `EXE_SW_OP;
+
+				// ⑦添加指令 - Relu
+				`EXE_RELU: alucontrol <= `EXE_RELU_OP;
 			endcase
 		end
 	end
