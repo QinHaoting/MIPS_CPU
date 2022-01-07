@@ -114,6 +114,10 @@
 `define EXE_SH  6'b101001
 `define EXE_SW  6'b101011
 
+// ---添加指令RELU---
+`define EXE_RELU 6'b111111
+`define EXE_RELU_OP 8'b00001111
+
 // 内陷特权
 `define EXE_BREAK 6'b001101
 `define EXE_SYSCALL 6'b001100
