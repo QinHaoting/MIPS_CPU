@@ -65,8 +65,12 @@ module maindec(
 					   (op == `EXE_LBU)   ||
 					   (op == `EXE_LH)    ||
 					   (op == `EXE_LHU)   ||
-					   (op == `EXE_LW)
+					   (op == `EXE_LW)	  ||
+					   
+					   // ---添加指令RELU---
+					   (op == 6'b111111 && instr[20:16] == 5'b00000 &&func == 6'b000000)
                    ) && ~stallD; 
+
 
 	assign regdst = (// R型
 					 (op == `EXE_SPECIAL_INST) ||

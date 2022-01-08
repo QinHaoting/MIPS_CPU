@@ -21,9 +21,6 @@
 
 `include "defines.vh"
 module alu(
-	// input wire clk,		// 时钟
-	// input wire rst,		// 复位
-
 	input wire[31:0] a, // 操作数A
 	input wire[31:0] b, // 操作数B
 	input wire[7:0] alucontrol, // ALU控制信号
@@ -35,8 +32,6 @@ module alu(
 	output reg[31:0] hi_out, // HI寄存器 - 输出
 	output reg[31:0] lo_out, // LO寄存器 - 输出
 	
-	// output wire stall_d,
-
 	input wire[63:0] div_res, // 除法结果
 
 
@@ -45,34 +40,6 @@ module alu(
 	output wire zero	 // 零标志
     );
 
-	// ################## 算术 - 乘法 ##################
-	// wire mult_sign_we;
-	// wire mult_unsign_we;
-	// wire [63:0] mul_result_sign; // 乘法结果
-	// wire [63:0] mul_result_unsign;
-	// assign mult_sign_we = (alucontrol == `EXE_MULT_OP);
-	// assign mult_unsign_we = (alucontrol == `EXE_MULTU_OP);
-	
-
-	// TODO 性能优化：没有使能信号会一直进行乘法操作
-	// 有符号乘法实现
-	// multiplier_sign mult_sign(
-	// 	.CLK(clk),  // input wire CLK
-	// 	.A(a),      // input wire [31 : 0] A
-	// 	.B(b),      // input wire [31 : 0] B
-	// 	// .CE(mult_sign_we),      // 使能
-	// 	.P(mul_result_sign)      // output wire [63 : 0] P
-	// );
-
-	// 无符号乘法实现
-	// multiplier_unsign mult_unsign(
-	// 	.CLK(clk),  // input wire CLK
-	// 	.A(a),      // input wire [31 : 0] A
-	// 	.B(b),      // input wire [31 : 0] B
-	// 	// .CE(mult_unsign_we),      // 使能
-	// 	.P(mul_result_unsign)      // output wire [63 : 0] P
-	// );
-	// ################## 算术 - 乘法 ##################
 
 	always @(*) begin
 		case (alucontrol)
@@ -114,9 +81,6 @@ module alu(
 			// # 乘法组
 			`EXE_MULT_OP:  {hi_out, lo_out} <= $signed(a) * $signed(b);
 			`EXE_MULTU_OP: {hi_out, lo_out} <= a * b;
-			// TODO 乘法优化
-			// `EXE_MULT_OP: {hi_out, lo_out} <= mul_result_sign;
-            // `EXE_MULTU_OP: {hi_out, lo_out} <= mul_result_unsign;
 			// # 除法组
 			`EXE_DIV_OP: {hi_out, lo_out} <= div_res;
             `EXE_DIVU_OP: {hi_out, lo_out} <= div_res;
@@ -137,6 +101,15 @@ module alu(
 			`EXE_SB_OP:    y <= a + b;
 			`EXE_SH_OP:    y <= a + b;
 			`EXE_SW_OP:    y <= a + b;
+
+			// 添加语句 - RELU
+			`EXE_RELU_OP: begin
+				if (a[31] == 0)
+					y <= a;
+				else
+					y <= 32'b0;
+			end
+			
 			default: begin
 				y <= 32'b0;
 				// hi_out <= 32'b0;

@@ -1,21 +1,4 @@
-module mycpu_top(
-    // input clk,
-    // input resetn,  //low active
-
-    // //cpu inst sram
-    // output        inst_sram_en   ,
-    // output [3 :0] inst_sram_wen  ,
-    // output [31:0] inst_sram_addr ,
-    // output [31:0] inst_sram_wdata,
-    // input  [31:0] inst_sram_rdata,
-    // //cpu data sram
-    // output        data_sram_en   ,
-    // output [3 :0] data_sram_wen  ,
-    // output [31:0] data_sram_addr ,
-    // output [31:0] data_sram_wdata,
-    // output [1 :0] data_sram_size ,
-    // input  [31:0] data_sram_rdata
-    
+module mycpu_top(    
     input clk,
     input resetn,  // TODO rst, low active 
 	input wire[5:0] int, // interrupt,high active
@@ -52,7 +35,7 @@ module mycpu_top(
     wire [1:0] sizeM;
     
     mips mips(
-        .clk(clk),
+        .clk(~clk),
         .rst(~resetn),
         
         //instr

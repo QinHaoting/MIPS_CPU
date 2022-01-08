@@ -47,16 +47,8 @@ module hazard(
 	//write back stage
 	input wire[4:0] writeregW,
 	input wire regwriteW
-
-	// input stallreq_from_if, stallreq_from_mem // 内存停顿
-
-	// input [31:0] excepttypeM,
-	// output reg [31:0] newpcM
-
-	// output wire flush_except
     );
 
-	// assign flush_except = (excepttypeM != 32'b0);
 
 	wire lwstallD, branchstallD;
 	wire jrstall;
@@ -66,7 +58,7 @@ module hazard(
 	assign forwardbD = (rtD != 0 & rtD == writeregM & regwriteM);
 	
 	//forwarding sources to E stage (ALU)
-	// TODO 数据前推的问题？？？
+	// TODO 数据前推的问题
 	always @(*) begin
 		forwardaE = 2'b00;
 		forwardbE = 2'b00;
@@ -101,56 +93,14 @@ module hazard(
 	assign jrstall =  // 条件①jr和jalr指令（涉及临时的写回寄存器temp）   // 条件②(i)   // 条件②(ii)
 	 				 (jumpD & jrD & regwriteE & (writeregE == rsD | writeregE == rtD)) |
 					 (jumpD & jrD & memtoregM & (writeregM == rsD | writeregM == rtD));
-	// assign jrstall = (jrD|jumpD) & ((regwriteE & writeregE == rsD) | (memtoregM & writeregM == rsD) );
 	
 	assign stallF = (lwstallD |branchstallD | div_stallE | jrstall);
-					//  stallreq_from_if | stallreq_from_mem
-					 
-	// assign stallF = (lwstallD | branchstallD | div_stallE); // TODO
+				
 	assign stallD = stallF;
 
-
-	// assign stallD = (lwstallD |
-	// 				 branchstallD |
-	// 				 div_stallE |
-	// 				 jrstall
-	// 				//  stallreq_from_if | stallreq_from_mem
-	// 				 );
-	// // assign stallF = (lwstallD | branchstallD | div_stallE); // TODO
-	// assign stallF = stallD;
-
-
-
 	assign stallE = div_stallE;
-					// stallreq_from_mem;
-	// assign stallM = stallreq_from_mem;
+
 	assign stallW = 0;
-	// TODO 停顿出问题
 	
-	
-
 	assign flushE = (lwstallD | branchstallD | jumpD);
-	// assign flushW = stallreq_from_mem;
-	// assign flushF = flush_except;
-	// assign flushE = (lwstallD | branchstallD); // TODO 
-
-	// assign #1 flushE = stallD & ~div_stallE;
-		//stalling D flushes next stage
-	// Note: not necessary to stall D stage on store
-  	//       if source comes from load;
-  	//       instead, another bypass network could
-  	//       be added from W to M
-	
-
-	//异常处理地址bfc00380
-    // always @(*) begin
-    //     if(excepttypeM != 32'b0) begin
-    //         if(excepttypeM == 32'h0000000e) begin
-    //             newpcM <= cp0_epcM;
-    //         end
-    //         else begin
-    //             newpcM <= 32'hBFC00380;//10 jump200
-    //         end
-    //     end
-    // end
 endmodule
